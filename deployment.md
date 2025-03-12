@@ -12,11 +12,7 @@
 docker load < csharp-template-api.tar
 
 # Run the container
-docker run -d \
-  -p 8080:8080 \
-  -e ASPNETCORE_URLS="http://+:8080" \
-  --name csharp-api \
-  csharp-template-api
+docker run -d -p 8080:8080 --name csharp-api csharp-template-api
 ```
 
 ## Health Check
