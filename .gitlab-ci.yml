@@ -1,0 +1,37 @@
+stages:
+  - unit_test
+  - build
+  - sqa
+  - update_tag_deployment
+
+unit_test:
+  stage: unit_test
+  image: mcr.microsoft.com/dotnet/sdk:9.0
+  script:
+    - echo "Running unit tests"
+    - dotnet restore
+    - dotnet test
+
+build_and_push:
+  stage: build
+  image: docker:20.10.16
+  services:
+    - docker:20.10.16-dind
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --build-arg REG_URL=$CI_REGISTRY_IMAGE -f Dockerfile.multi .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - |
+      if [ "$CI_COMMIT_BRANCH" = "main" ]; then
+        docker tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE:latest
+        docker push $CI_REGISTRY_IMAGE:latest
+      fi
+  only:
+    - main
+
+trivy_scan:
+  stage: sqa
+
+update_tag_deployment:
+  stage: update_tag_deployment
