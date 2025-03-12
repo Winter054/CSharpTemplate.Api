@@ -9,6 +9,9 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
+// Redirect root to Swagger UI
+app.MapGet("/", () => Results.Redirect("/swagger"));
+
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
